@@ -1,6 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
-import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRouter, useSegments } from "expo-router"; // Importação do router para controle de navegação
 
@@ -9,9 +9,10 @@ interface LayoutProps {
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-    const { theme } = useTheme();
+    const { theme, toggleTheme } = useTheme();
     const router = useRouter();
     const segments = useSegments(); // Obtém a rota atual
+    const [menuVisible, setMenuVisible] = useState(false);
 
     const isHomeOrLogin = segments.includes("home") || segments.includes("login");
 
@@ -20,8 +21,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             flex: 1,
         },
         header: {
-            height: 30,
-            paddingTop: 20,
+            minHeight: 50,
+            paddingTop: 0,
             backgroundColor: theme.primary,
             flexDirection: "row",
             alignItems: "center",
@@ -32,6 +33,36 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             color: theme.secondary,
             fontSize: 18,
             fontWeight: "bold",
+        },
+        iconButton: {
+            padding: 8,
+        },
+        modalOverlay: {
+            flex: 1,
+            backgroundColor: "rgba(0,0,0,0.3)",
+        },
+        menuContainer: {
+            position: "absolute",
+            right: 10,
+            top: 40,
+            backgroundColor: "#fff",
+            borderRadius: 10,
+            padding: 10,
+            shadowColor: "#000",
+            shadowOpacity: 0.2,
+            shadowRadius: 4,
+            elevation: 5,
+        },
+        menuItem: {
+            flexDirection: "row",
+            alignItems: "center",
+            paddingVertical: 10,
+            paddingHorizontal: 15,
+        },
+        menuText: {
+            marginLeft: 10,
+            fontSize: 16,
+            color: "#333",
         },
         backButton: {
             width: 30,  // Aumenta a área de toque da seta
@@ -48,7 +79,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         },
         content: {
             flex: 1,
-            paddingTop: 20,
         },
         footer: {
             height: 50,
@@ -62,12 +92,40 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         },
     });
 
+    const ProfileMenu = ({ visible, onClose }) => {
+        return (
+            <Modal transparent={true} visible={visible} animationType="fade">
+                <TouchableOpacity style={styles.modalOverlay} onPress={onClose} />
+                <View style={styles.menuContainer}>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => console.log("Ver Perfil")}>
+                        <Icon name="person" size={24} color="#333" />
+                        <Text style={styles.menuText}>Ver Perfil</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem} onPress={toggleTheme}>
+                        <Icon name="brightness-6" size={24} color="#333" />
+                        <Text style={styles.menuText}>Mudar Tema</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => console.log("Configurações")}>
+                        <Icon name="settings" size={24} color="#333" />
+                        <Text style={styles.menuText}>Configurações</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity style={styles.menuItem} onPress={() => console.log("Sair")}>
+                        <Icon name="exit-to-app" size={24} color="red" />
+                        <Text style={[styles.menuText, { color: "red" }]}>Sair</Text>
+                    </TouchableOpacity>
+                </View>
+            </Modal>
+        );
+    };
+
     return (
         <View style={styles.container}>
             {/* Header */}
             <View>
                 <View style={styles.header}>
-                    <TouchableOpacity style={styles.iconButton} onPress={() => console.log("Menu aberto")}>
+                    <TouchableOpacity style={styles.iconButton}
+                        onPress={() => console.log("Menu aberto")}
+                    >
                         <Icon name="menu" size={28} color={theme.secondary} />
                     </TouchableOpacity>
 
@@ -80,9 +138,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     )}
                     <Text style={styles.headerText}>Proto-On</Text>
 
-                    <TouchableOpacity style={styles.iconButton} onPress={() => console.log("Perfil aberto")}>
+                    <TouchableOpacity style={styles.iconButton}
+                        onPress={() => setMenuVisible(true)}
+                    >
                         <Icon name="account-circle" size={28} color={theme.secondary} />
                     </TouchableOpacity>
+                    <ProfileMenu visible={menuVisible} onClose={() => setMenuVisible(false)} />
                 </View>
             </View>
 
