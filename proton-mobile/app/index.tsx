@@ -34,7 +34,6 @@ export default function SplashScreen() {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Bem Vindo</Text>
-      <Text style={styles.text}>Carregando...</Text>
       <ActivityIndicator size="large" />
     </View>
   );
