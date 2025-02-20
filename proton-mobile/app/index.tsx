@@ -1,15 +1,43 @@
-import { Text, View } from "react-native";
+import { useEffect } from "react";
+import { View, Text, ActivityIndicator, StyleSheet } from "react-native";
+import { useRouter } from "expo-router";
+import { useTheme } from "../context/ThemeContext";
 
-export default function Index() {
+export default function SplashScreen() {
+  const router = useRouter();
+  const { theme } = useTheme();
+
+  useEffect(() => {
+    setTimeout(() => {
+      router.replace("/login"); // Redireciona para login
+    }, 2000);
+  }, []);
+
+  const styles = StyleSheet.create({
+    container: {
+      backgroundColor: theme.background,
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+    },
+    title: {
+      fontSize: 30,
+      color: theme.primary,
+      marginVertical:30,
+    },
+    text: {
+      fontSize: 20,
+      color: theme.primary,
+    },
+  });
+
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
+    <View style={styles.container}>
+      <Text style={styles.title}>Bem Vindo</Text>
+      <Text style={styles.text}>Carregando...</Text>
+      <ActivityIndicator size="large" />
     </View>
   );
 }
+
+
