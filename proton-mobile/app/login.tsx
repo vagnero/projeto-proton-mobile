@@ -3,11 +3,16 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
 import { API } from "@/services/api";
+import Popup from "../components/Popup";
+
 export default function LoginScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
+  const [popupMessage, setPopupMessage] = useState("");
+  const [popupType, setPopupType] = useState<"success" | "error">("success");
+  const [showPopup, setShowPopup] = useState(false);
 
   const styles = StyleSheet.create({
     container: {
@@ -39,19 +44,54 @@ export default function LoginScreen() {
     },
   });
 
+  const showPopupMessage = (type: "success" | "error", message: string) => {
+    setPopupType(type);
+    setPopupMessage(message);
+    setShowPopup(true);
+  };
+
   const loginMethod = async () => {
+    // Remove espaços extras e converter para minúsculas
+    const emailFormatado = email.trim().toLowerCase();
+    const senhaFormatada = senha.trim();
+
+    // Validações
+    if (!emailFormatado || !senhaFormatada) {
+      showPopupMessage("error", "Preencha todos os campos!");
+      return;
+    }
+    
+    if (emailFormatado.length < 3) {
+      showPopupMessage("error", "O e-mail deve ter pelo menos 3 caracteres.");
+      return;
+    }
+
+    // Expressão regular para validar o formato de e-mail
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(emailFormatado)) {
+      showPopupMessage("error", "Digite um e-mail válido.");
+      return;
+    }
+
+    if (senhaFormatada.length < 6) {
+      showPopupMessage("error", "A senha deve ter pelo menos 6 caracteres.");
+      return;
+    }
     try {
-      const response = await API.post("/auth/authenticate", { email, senha });
+      // Requisição à API
+      const response = await API.post("/auth/authenticate", {
+        email: emailFormatado,
+        senha: senhaFormatada
+      });
+
       if (response.status === 200) {
-        // Handle successful login, e.g., navigate to home screen
+        // Login bem-sucedido
         router.push("/home");
       } else {
-        // Handle login failure, e.g., show error message
-        alert("Login failed. Please check your credentials.");
+        showPopupMessage("error", "Login falhou.");
       }
     } catch (error) {
-      // Handle error, e.g., show error message
-      alert("An error occurred. Please try again.");
+      showPopupMessage("error", "Login falhou. Verifique suas credenciais.");
     }
   };
 
@@ -70,21 +110,28 @@ export default function LoginScreen() {
         value={senha}
         onChangeText={setSenha}
       />
-      <TouchableOpacity 
-      style={styles.button} 
-      onPress={loginMethod} >
+      <TouchableOpacity
+        style={styles.button}
+        onPress={loginMethod} >
         <Text style={[styles.text, { color: theme.secondary }]}>Entrar</Text>
       </TouchableOpacity>
-      <TouchableOpacity 
-      style={styles.button}
-       onPress={() => router.push("/register")} >
+      <TouchableOpacity
+        style={styles.button}
+        onPress={() => router.push("/register")} >
         <Text style={[styles.text, { color: theme.secondary }]}>Cadastrar</Text>
-       </TouchableOpacity>
-      <TouchableOpacity 
-      style={[styles.button, { backgroundColor: theme.secondary }]}
-       onPress={() => router.replace("/esqueceuSenha")} >
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={[styles.button, { backgroundColor: theme.secondary }]}
+        onPress={() => router.replace("/esqueceuSenha")} >
         <Text style={[styles.text, { color: theme.primary }]}>Esqueceu a senha?</Text>
-       </TouchableOpacity>
+      </TouchableOpacity>
+      {showPopup && (
+        <Popup
+          message={popupMessage}
+          type={popupType}
+          onClose={() => setShowPopup(false)}
+        />
+      )}
     </View>
   );
 }
