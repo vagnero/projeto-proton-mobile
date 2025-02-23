@@ -2,12 +2,12 @@ import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from "rea
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
-
+import { API } from "@/services/api";
 export default function LoginScreen() {
   const router = useRouter();
   const { theme } = useTheme();
   const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [senha, setSenha] = useState("");
 
   const styles = StyleSheet.create({
     container: {
@@ -39,6 +39,22 @@ export default function LoginScreen() {
     },
   });
 
+  const loginMethod = async () => {
+    try {
+      const response = await API.post("/auth/authenticate", { email, senha });
+      if (response.status === 200) {
+        // Handle successful login, e.g., navigate to home screen
+        router.push("/home");
+      } else {
+        // Handle login failure, e.g., show error message
+        alert("Login failed. Please check your credentials.");
+      }
+    } catch (error) {
+      // Handle error, e.g., show error message
+      alert("An error occurred. Please try again.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Email:</Text>
@@ -51,12 +67,12 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         secureTextEntry
-        value={password}
-        onChangeText={setPassword}
+        value={senha}
+        onChangeText={setSenha}
       />
       <TouchableOpacity 
       style={styles.button} 
-      onPress={() => router.push("/home")} >
+      onPress={loginMethod} >
         <Text style={[styles.text, { color: theme.secondary }]}>Entrar</Text>
       </TouchableOpacity>
       <TouchableOpacity 
