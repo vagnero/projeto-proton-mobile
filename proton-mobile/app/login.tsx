@@ -24,6 +24,7 @@ export default function LoginScreen() {
     },
     input: {
       borderWidth: 1,
+      width: '80%',
       borderColor: theme.primary,
       color: theme.text,
       padding: 10,

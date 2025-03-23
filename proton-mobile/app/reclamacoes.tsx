@@ -10,7 +10,6 @@ import {
     TouchableOpacity
 } from "react-native";
 import axios from "axios";
-import URL from "../services/url";
 import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import { useTheme } from "../context/ThemeContext";
@@ -53,12 +52,6 @@ const Reclamar: React.FC = () => {
     const [assuntos, setAssuntos] = useState<Assunto[]>([]);
     const router = useRouter();
 
-    // 🔹 Configuração do Axios com Tipagem
-    const axiosInstance = axios.create({
-        baseURL: URL,
-        withCredentials: true,
-    });
-
     const styles = StyleSheet.create({
         container: {
             backgroundColor: theme.background,
@@ -75,7 +68,7 @@ const Reclamar: React.FC = () => {
         },
         picker: {
             height: 50, // Ajusta a altura
-            width: "100%", // Faz ocupar toda a largura disponível
+            width: 300, // Faz ocupar toda a largura disponível
             color: "#333", // Cor do texto
             backgroundColor: "#f9f9f9", // Cor de fundo
         },
@@ -115,7 +108,7 @@ const Reclamar: React.FC = () => {
     useEffect(() => {
         async function fetchAssuntos() {
             try {
-                const response = await axiosInstance.get<Assunto[]>("/protoon/assuntos");
+                const response = await API.get<Assunto[]>("/assuntos");
                 setAssuntos(response.data);
             } catch (error) {
                 console.error("Erro ao buscar os assuntos:", error);
@@ -221,6 +214,7 @@ const Reclamar: React.FC = () => {
                 value={formData.descricao}
                 onChangeText={(text) => handleChange("descricao", text)}
                 multiline
+                textAlignVertical="top"
             />
 
             <TouchableOpacity

@@ -1,7 +1,9 @@
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import URL from '../services/url'
 
-const API_URL = "http://localhost:8080/protoon";
+const API_URL = URL
+
 
 // Função para obter o token armazenado
 const getToken = async () => {

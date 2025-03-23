@@ -2,7 +2,12 @@ import React, { useState } from "react";
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 
-const ProfileMenu = ({ visible, onClose }) => {
+interface ProfileMenuProps {
+    visible: boolean;
+    onClose: () => void;
+}
+
+const ProfileMenu: React.FC<ProfileMenuProps> = ({ visible, onClose }) => {
     return (
         <Modal transparent={true} visible={visible} animationType="fade">
             <TouchableOpacity style={styles.modalOverlay} onPress={onClose} />

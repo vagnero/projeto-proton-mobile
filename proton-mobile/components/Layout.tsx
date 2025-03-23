@@ -11,10 +11,14 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
     const { theme, toggleTheme } = useTheme();
     const router = useRouter();
-    const segments = useSegments(); // Obtém a rota atual
+    const segments: string[] = ['home', 'login', 'otherPage']; // exemplo de valor
     const [menuVisible, setMenuVisible] = useState(false);
 
+    const currentYear = new Date().getFullYear();
+
+
     const isHomeOrLogin = segments.includes("home") || segments.includes("login");
+
 
     const styles = StyleSheet.create({
         container: {
@@ -92,7 +96,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         },
     });
 
-    const ProfileMenu = ({ visible, onClose }) => {
+    interface ProfileMenuProps {
+        visible: boolean;
+        onClose: () => void;
+    }
+
+    const ProfileMenu: React.FC<ProfileMenuProps> = ({ visible, onClose }) => {
         return (
             <Modal transparent={true} visible={visible} animationType="fade">
                 <TouchableOpacity style={styles.modalOverlay} onPress={onClose} />
@@ -154,7 +163,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* Footer */}
             <View style={styles.footer}>
-                <Text style={styles.footerText}>© 2024 Proto-On</Text>
+                <Text style={styles.footerText}>© {currentYear} Proto-On</Text>
             </View>
         </View>
     );

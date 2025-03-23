@@ -180,7 +180,7 @@ export default function RegisterScreen() {
         <Text style={[styles.text, { color: theme.secondary }]}>Cadastrar</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.button} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.button} onPress={() => router.replace('/login')}>
         <Text style={[styles.text, { color: theme.secondary }]}>Voltar</Text>
       </TouchableOpacity>
       {loading && <ActivityIndicator size="large" color="#0000ff" />}
