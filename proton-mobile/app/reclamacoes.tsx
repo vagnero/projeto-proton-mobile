@@ -15,7 +15,8 @@ import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import { useTheme } from "../context/ThemeContext";
 import Popup from "../components/Popup";
-import Cookies from '@react-native-cookies/cookies';
+// import Cookies from '@react-native-cookies/cookies';
+import { API, getToken } from "@/services/api";
 
 // 🔹 Interface para os Assuntos
 interface Assunto {
@@ -57,17 +58,6 @@ const Reclamar: React.FC = () => {
         baseURL: URL,
         withCredentials: true,
     });
-
-    const getTokenFromCookie = async () => {
-        try {
-            const cookies = await Cookies.get("https://seu-dominio.com"); // Passe a URL aqui
-            const token = cookies['token']?.value; // Acesse o valor do cookie diretamente
-            return { token: token || null }; // Retorna o token, ou null se não existir
-        } catch (error) {
-            console.error("Erro ao pegar o token do cookie:", error);
-            return { token: null }; // Retorna null caso ocorra erro
-        }
-    };
 
     const styles = StyleSheet.create({
         container: {
@@ -151,30 +141,39 @@ const Reclamar: React.FC = () => {
     };
 
     // 🔹 Enviar Dados para a API
-    const handleSubmit = async () => {
-        setLoading(true);
-
+    const handleSubmit = async () => {        
         if (!formData.assunto) {
             showPopupMessage("error", "Selecione um problema");
             return;
         }
-
+        
         if (formData.descricao.length < 3) {
             showPopupMessage("error", "Descreva o problema com mais detalhes");
             return;
         }
 
+        setLoading(true);
+        
+        const token = await getToken(); // ✅ Obtendo o token do AsyncStorage
+
         try {
+            if (!token || token === 'undefined') {
+                setTimeout(() => {
+                    setLoading(false); // Desativa o loading após a requisição
+                    showPopupMessage("error", "Erro de autenticação. Faça login novamente.");
+                }, 2000);
+                setLoading(false);
+                return;
+            }
+
             const currentDate = new Date();
+
             const endpoint =
                 formData.assunto === "Outros"
-                    ? "/protoon/protocolo/abrir-protocolos-reclamar-sem-secretaria"
-                    : `/protoon/protocolo/abrir-protocolos-reclamar/${formData.idSecretaria}`;
+                    ? "/protocolo/abrir-protocolos-sem-secretaria"
+                    : `/protocolo/abrir-protocolos/${formData.idSecretaria}`;            
 
-            // const token = "eyJhbGciOiJIUzI1NiJ9.eyJpZCI6MSwic3ViIjoiZnVsYW5vQGVtYWlsLmNvbSIsImlhdCI6MTc0MjY1MzA0OCwiZXhwIjoxNzQyNzEzMDQ4fQ.A30Wgo_p3v-S-4cjRu09jVWo8_i5oyiakmsebVLbomA"; // Aqui você vai recuperar o token (de AsyncStorage, por exemplo)
-            const { token } = await getTokenFromCookie();
-
-            await axiosInstance.post(endpoint, {
+            await API.post(endpoint, {
                 ...formData,
                 data_protocolo: currentDate,
             }, {
@@ -192,9 +191,10 @@ const Reclamar: React.FC = () => {
             }, 3000);
 
         } catch (error) {
-            console.error("Erro ao enviar dados:", error);
-            showPopupMessage("error", "Falha ao enviar reclamação");
-            setLoading(false); // Desativa o loading após a requisição
+            setTimeout(() => {
+                setLoading(false); // Desativa o loading após a requisição
+                showPopupMessage("error", "Falha ao enviar reclamação.");
+            }, 2000);
         }
     };
 

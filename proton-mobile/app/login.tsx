@@ -1,8 +1,8 @@
-import { View, Text, TextInput, Button, StyleSheet, TouchableOpacity } from "react-native";
+import { View, Text, TextInput, Button, ActivityIndicator, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
 import { useState } from "react";
 import { useTheme } from "../context/ThemeContext";
-import { API } from "@/services/api";
+import { API, saveToken } from "@/services/api";
 import Popup from "../components/Popup";
 
 export default function LoginScreen() {
@@ -13,6 +13,7 @@ export default function LoginScreen() {
   const [popupMessage, setPopupMessage] = useState("");
   const [popupType, setPopupType] = useState<"success" | "error">("success");
   const [showPopup, setShowPopup] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const styles = StyleSheet.create({
     container: {
@@ -60,7 +61,7 @@ export default function LoginScreen() {
       showPopupMessage("error", "Preencha todos os campos!");
       return;
     }
-    
+
     if (emailFormatado.length < 3) {
       showPopupMessage("error", "O e-mail deve ter pelo menos 3 caracteres.");
       return;
@@ -77,6 +78,9 @@ export default function LoginScreen() {
       showPopupMessage("error", "A senha deve ter pelo menos 6 caracteres.");
       return;
     }
+
+    setLoading(true);
+
     try {
       // Requisição à API
       const response = await API.post("/auth/authenticate", {
@@ -86,12 +90,22 @@ export default function LoginScreen() {
 
       if (response.status === 200) {
         // Login bem-sucedido
-        router.push("/home");
+        await saveToken(response.data.access_token);
+        setTimeout(() => {
+          setLoading(false);
+          router.push("/home");
+        }, 3000);
       } else {
-        showPopupMessage("error", "Login falhou.");
+        setTimeout(() => {
+          setLoading(false);
+          showPopupMessage("error", "Login falhou.");
+        }, 3000);
       }
     } catch (error) {
-      showPopupMessage("error", "Login falhou. Verifique suas credenciais.");
+      setTimeout(() => {
+        setLoading(false);
+        showPopupMessage("error", "Login falhou. Verifique suas credenciais.");
+      }, 3000);
     }
   };
 
@@ -125,6 +139,7 @@ export default function LoginScreen() {
         onPress={() => router.replace("/esqueceuSenha")} >
         <Text style={[styles.text, { color: theme.primary }]}>Esqueceu a senha?</Text>
       </TouchableOpacity>
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
       {showPopup && (
         <Popup
           message={popupMessage}
