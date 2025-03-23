@@ -116,7 +116,8 @@ export default function LoginScreen() {
       <TextInput
         style={styles.input}
         value={email}
-        onChangeText={setEmail}
+        onChangeText={(text) => setEmail(text.toLowerCase())} // Converte para minúsculas
+        autoCapitalize="none" // Impede a capitalização automática
       />
       <Text style={styles.text}>Senha:</Text>
       <TextInput
@@ -125,6 +126,7 @@ export default function LoginScreen() {
         value={senha}
         onChangeText={setSenha}
       />
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
       <TouchableOpacity
         style={styles.button}
         onPress={loginMethod} >
@@ -139,8 +141,7 @@ export default function LoginScreen() {
         style={[styles.button, { backgroundColor: theme.secondary }]}
         onPress={() => router.replace("/esqueceuSenha")} >
         <Text style={[styles.text, { color: theme.primary }]}>Esqueceu a senha?</Text>
-      </TouchableOpacity>
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
+      </TouchableOpacity>      
       {showPopup && (
         <Popup
           message={popupMessage}

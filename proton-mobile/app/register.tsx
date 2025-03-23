@@ -171,11 +171,17 @@ export default function RegisterScreen() {
       <TextInput style={styles.input} value={name} onChangeText={setName} />
 
       <Text style={styles.text}>Email</Text>
-      <TextInput style={styles.input} value={email} onChangeText={setEmail} />
+      <TextInput
+        style={styles.input}
+        value={email}
+        onChangeText={(text) => setEmail(text.toLowerCase())} // Converte para minúsculas
+        autoCapitalize="none" // Impede a capitalização automática
+      />
 
       <Text style={styles.text}>Senha</Text>
       <TextInput style={styles.input} secureTextEntry value={password} onChangeText={setPassword} />
 
+      {loading && <ActivityIndicator size="large" color="#0000ff" />}
       <TouchableOpacity style={styles.button} onPress={handleRegister}>
         <Text style={[styles.text, { color: theme.secondary }]}>Cadastrar</Text>
       </TouchableOpacity>
@@ -183,7 +189,6 @@ export default function RegisterScreen() {
       <TouchableOpacity style={styles.button} onPress={() => router.replace('/login')}>
         <Text style={[styles.text, { color: theme.secondary }]}>Voltar</Text>
       </TouchableOpacity>
-      {loading && <ActivityIndicator size="large" color="#0000ff" />}
       {showPopup && (
         <Popup
           message={popupMessage}

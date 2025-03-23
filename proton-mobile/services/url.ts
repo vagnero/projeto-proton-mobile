@@ -1,7 +1,7 @@
 import { NetworkInfo } from 'react-native-network-info';
 
-// let API_URL = "http://localhost:8080/protoon";
-let API_URL = "http://192.168.18.3:8080/protoon";
+// let API_URL = "http://localhost:8080/protoon"; // Para emular na web
+let API_URL = "http://192.168.18.3:8080/protoon"; // Para emular no android
 
 // Função para obter a URL da API com base no IP local
 const getAPIUrl = async () => {
@@ -22,12 +22,12 @@ const getAPIUrl = async () => {
     API_URL = apiUrl;
   } catch (error) {
     // Caso a URL com o IP local falhe, usa o localhost
-    API_URL = "http://192.168.18.3:8080/protoon";
+    API_URL = "http://localhost:8080/protoon";
   }
 };
 
 // Chama a função para definir a URL de API
-getAPIUrl();
+// getAPIUrl();
 
 // Exporta a URL final para ser usada em outros arquivos
 export default API_URL;
