@@ -9,7 +9,7 @@ export default function SplashScreen() {
 
   useEffect(() => {
     setTimeout(() => {
-      router.replace("/solicitarServico"); // Redireciona para login
+      router.replace("/login"); // Redireciona para login
     }, 2000);
   }, []);
 

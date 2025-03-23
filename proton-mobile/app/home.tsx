@@ -1,10 +1,23 @@
 import { useTheme } from "../context/ThemeContext";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useRouter } from "expo-router";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const HomeScreen = () => {
   const router = useRouter();
   const { theme } = useTheme();
+
+  const handleLogout = async () => {
+    try {
+      // Remover o token do AsyncStorage
+      await AsyncStorage.removeItem('token');
+
+      // Redirecionar para a tela de login
+      router.replace('/login'); // Substitua 'Login' pelo nome correto da sua tela de login
+    } catch (error) {
+      console.error("Erro ao realizar logout", error);
+    }
+  };
 
   const styles = StyleSheet.create({
     container: {
@@ -44,7 +57,7 @@ const HomeScreen = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
-        onPress={() => router.push("/consultar")} 
+        onPress={() => router.push("/consultar")}
       >
         <Text style={[styles.text, { color: theme.secondary }]}>Consultar</Text>
       </TouchableOpacity>
@@ -52,7 +65,7 @@ const HomeScreen = () => {
         style={styles.button}
         onPress={() => router.replace("/login")}
       >
-        <Text style={[styles.text, { color: theme.secondary }]}>Sair</Text>
+        <Text onPress={handleLogout} style={[styles.text, { color: theme.secondary }]}>Sair</Text>
       </TouchableOpacity>
     </View>
   );

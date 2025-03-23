@@ -8,7 +8,6 @@ const getAPIUrl = async () => {
   try {
     // Tente obter o IP local da máquina
     const localIp = NetworkInfo.getIPAddress();
-    console.log('IP local:', localIp);  // Mostra o IP no console para debug
 
     // Substitua o localhost pelo IP local
     const apiUrl = `http://${localIp}:8080/protoon`; 
@@ -22,7 +21,6 @@ const getAPIUrl = async () => {
     // Se a URL com o IP local for válida, usa essa URL
     API_URL = apiUrl;
   } catch (error) {
-    console.log('Erro ao acessar a API, usando getApi');
     // Caso a URL com o IP local falhe, usa o localhost
     API_URL = "http://192.168.18.3:8080/protoon";
   }

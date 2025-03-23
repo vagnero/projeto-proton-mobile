@@ -3,6 +3,7 @@ import { useTheme } from "../context/ThemeContext";
 import { View, Text, StyleSheet, TouchableOpacity, Modal } from "react-native";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useRouter, useSegments } from "expo-router"; // Importação do router para controle de navegação
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface LayoutProps {
     children: React.ReactNode;
@@ -101,6 +102,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         onClose: () => void;
     }
 
+    const handleLogout = async () => {
+        try {
+            // Remover o token do AsyncStorage
+            await AsyncStorage.removeItem('token');
+
+            // Redirecionar para a tela de login
+            router.replace('/login'); // Substitua 'Login' pelo nome correto da sua tela de login
+        } catch (error) {
+            console.error("Erro ao realizar logout", error);
+        }
+    };
+
     const ProfileMenu: React.FC<ProfileMenuProps> = ({ visible, onClose }) => {
         return (
             <Modal transparent={true} visible={visible} animationType="fade">
@@ -118,7 +131,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                         <Icon name="settings" size={24} color="#333" />
                         <Text style={styles.menuText}>Configurações</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity style={styles.menuItem} onPress={() => console.log("Sair")}>
+                    <TouchableOpacity style={styles.menuItem} onPress={handleLogout}>
                         <Icon name="exit-to-app" size={24} color="red" />
                         <Text style={[styles.menuText, { color: "red" }]}>Sair</Text>
                     </TouchableOpacity>
