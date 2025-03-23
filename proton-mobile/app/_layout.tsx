@@ -14,6 +14,7 @@ export default function RootLayout() {
             <Stack.Screen name="login" options={{ title: "" }} />
             <Stack.Screen name="register" options={{ title: "", headerTintColor: "#2D9596" }} />
             <Stack.Screen name="reclamacoes" options={{ title: "", headerTintColor: "#2D9596" }} />
+            <Stack.Screen name="solicitarServico" options={{ title: "", headerTintColor: "#2D9596" }} />
             <Stack.Screen name="consultar" options={{ title: "", headerTintColor: "#2D9596" }} />
             <Stack.Screen name="todas-devolutivas" options={{ title: "", headerTintColor: "#2D9596" }} />
             <Stack.Screen name="esqueceuSenha" options={{ title: "", headerTintColor: "#2D9596" }} />

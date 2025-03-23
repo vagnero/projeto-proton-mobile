@@ -38,6 +38,12 @@ const HomeScreen = () => {
       </TouchableOpacity>
       <TouchableOpacity
         style={styles.button}
+        onPress={() => router.replace("/solicitarServico")}
+      >
+        <Text style={[styles.text, { color: theme.secondary }]}>Solicitar um Serviço</Text>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.button}
         onPress={() => router.push("/consultar")} 
       >
         <Text style={[styles.text, { color: theme.secondary }]}>Consultar</Text>

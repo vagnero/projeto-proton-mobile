@@ -14,26 +14,40 @@ import { Picker } from "@react-native-picker/picker";
 import { useRouter } from "expo-router";
 import { useTheme } from "../context/ThemeContext";
 import Popup from "../components/Popup";
-// import Cookies from '@react-native-cookies/cookies';
 import { API, getToken } from "@/services/api";
 
-// 🔹 Interface para os Assuntos
+interface Endereco {
+    id_endereco: number;
+    bairro: string;
+    cidade: string;
+    complemento: string;
+    estado: string;
+    logradouro: string;
+    nome_endereco: string;
+    num_cep: string;
+    num_endereco: string;
+    pais: string;
+    tipo_endereco: string;
+}
+
+interface Secretaria {
+    id_secretaria: number;
+    nome_secretaria: string;
+    nome_responsavel: string;
+    email: string;
+    endereco: Endereco;
+}
+
 interface Assunto {
     id_assunto: number;
     assunto: string;
-    secretaria: { id_secretaria: number };
+    prioridade: string;
+    tempoResolucao: number;
+    valor_protocolo: number;  // Certifique-se de que esta propriedade está definida no tipo
+    secretaria: Secretaria;
 }
 
-// 🔹 Interface para o Estado do Formulário
-interface FormData {
-    assunto: string;
-    descricao: string;
-    idSecretaria: string | number | null; // 🔹 Alterado para aceitar number também
-    status: number;
-    valor: number;
-}
-
-const Reclamar: React.FC = () => {
+const SolicitarServico: React.FC = () => {
     const { theme } = useTheme();
     const [popupMessage, setPopupMessage] = useState("");
     const [popupType, setPopupType] = useState<"success" | "error">("success");
@@ -41,16 +55,124 @@ const Reclamar: React.FC = () => {
     const [loading, setLoading] = useState(false);
 
     // 🔹 Estado do Formulário Tipado
+    const [assuntos, setAssuntos] = useState<Assunto[]>([]);
+
+    interface FormData {
+        descricao: string;
+        idSecretaria: number | null;
+        status: number;
+        valor: number | null;
+        assunto: string;  // Adicione esta linha
+    }
+
     const [formData, setFormData] = useState<FormData>({
-        assunto: "",
         descricao: "",
         idSecretaria: null,
-        status: 1,
-        valor: 0,
+        status: 0,
+        valor: null,
+        assunto: "",  // Inicialize a propriedade 'assunto'
     });
 
-    const [assuntos, setAssuntos] = useState<Assunto[]>([]);
     const router = useRouter();
+
+    const showPopupMessage = (type: "success" | "error", message: string) => {
+        setPopupType(type);
+        setPopupMessage(message);
+        setShowPopup(true);
+    };
+
+    // 🔹 Buscar Assuntos da API
+    useEffect(() => {
+        async function fetchAssuntos() {
+            try {
+                const response = await API.get<Assunto[]>("/assuntos");
+                setAssuntos(response.data);
+            } catch (error) {
+                console.error("Erro ao buscar os assuntos:", error);
+                showPopupMessage("error", "Falha ao carregar os assuntos");
+            }
+        }
+        fetchAssuntos();
+    }, []);
+
+    const handleChange = (name: string, value: string) => {
+        setFormData((prevState: FormData) => ({
+            ...prevState,
+            [name]: value
+        }));
+
+        if (name === 'assunto') {
+            const selectedAssunto = assuntos.find((assunto) => {
+                return assunto.assunto === value;  // Retorne o resultado da comparação
+            });
+
+            setFormData((prevState: FormData) => ({
+                ...prevState,
+                idSecretaria: selectedAssunto ? selectedAssunto.secretaria.id_secretaria : null,
+                valor: selectedAssunto && selectedAssunto.valor_protocolo !== undefined
+                    ? selectedAssunto.valor_protocolo
+                    : null  // Ou 0, dependendo de como você deseja tratar esse valor
+            }));
+        }
+    };
+
+    // 🔹 Enviar Dados para a API
+    const handleSubmit = async () => {
+        if (!formData.assunto) {
+            showPopupMessage("error", "Selecione um problema");
+            return;
+        }
+
+        if (formData.descricao.length < 3) {
+            showPopupMessage("error", "Descreva o problema com mais detalhes");
+            return;
+        }
+
+        setLoading(true);
+
+        const token = await getToken(); // ✅ Obtendo o token do AsyncStorage
+
+        try {
+            if (!token || token === 'undefined') {
+                setTimeout(() => {
+                    setLoading(false); // Desativa o loading após a requisição
+                    showPopupMessage("error", "Erro de autenticação. Faça login novamente.");
+                }, 2000);
+                setLoading(false);
+                return;
+            }
+
+            const currentDate = new Date();
+
+            const endpoint =
+                formData.assunto === "Outros"
+                    ? "/protocolo/abrir-protocolos-sem-secretaria"
+                    : `/protocolo/abrir-protocolos/${formData.idSecretaria}`;
+
+            await API.post(endpoint, {
+                ...formData,
+                data_protocolo: currentDate,
+            }, {
+                headers: {
+                    Authorization: `Bearer ${token}`,
+                },
+            });
+
+            setTimeout(() => {
+                setLoading(false); // Desativa o loading após a requisição
+                showPopupMessage("success", "Reclamação enviada com sucesso!")
+                setTimeout(() => {
+                    router.push("/home");
+                }, 3000);
+            }, 3000);
+
+        } catch (error) {
+            setTimeout(() => {
+                setLoading(false); // Desativa o loading após a requisição
+                showPopupMessage("error", "Falha ao enviar reclamação.");
+            }, 2000);
+        }
+    };
 
     const styles = StyleSheet.create({
         container: {
@@ -87,6 +209,11 @@ const Reclamar: React.FC = () => {
             fontSize: 20,
             color: theme.primary,
         },
+        campoValor: {
+            fontSize: 20,
+            color: theme.primary,
+            textAlign: 'center'
+        },
         button: {
             backgroundColor: theme.primary,
             minWidth: 150,
@@ -96,100 +223,13 @@ const Reclamar: React.FC = () => {
             borderRadius: 10,
             alignItems: "center",
         },
+        inputContainer: {
+            marginTop: 20,
+            width: 200,
+            height: 100,
+            textAlign: 'center'
+        },
     });
-
-    const showPopupMessage = (type: "success" | "error", message: string) => {
-        setPopupType(type);
-        setPopupMessage(message);
-        setShowPopup(true);
-    };
-
-    // 🔹 Buscar Assuntos da API
-    useEffect(() => {
-        async function fetchAssuntos() {
-            try {
-                const response = await API.get<Assunto[]>("/assuntos");
-                setAssuntos(response.data);
-            } catch (error) {
-                console.error("Erro ao buscar os assuntos:", error);
-                showPopupMessage("error", "Falha ao carregar os assuntos");
-            }
-        }
-        fetchAssuntos();
-    }, []);
-
-    // 🔹 Manipular Alterações no Formulário
-    const handleChange = (name: keyof FormData, value: string) => {
-        setFormData((prevState) => ({
-            ...prevState,
-            [name]: value,
-            ...(name === "assunto"
-                ? {
-                    idSecretaria:
-                        assuntos.find((item) => item.assunto === value)?.secretaria
-                            .id_secretaria || null,
-                }
-                : {}),
-        }));
-    };
-
-    // 🔹 Enviar Dados para a API
-    const handleSubmit = async () => {        
-        if (!formData.assunto) {
-            showPopupMessage("error", "Selecione um problema");
-            return;
-        }
-        
-        if (formData.descricao.length < 3) {
-            showPopupMessage("error", "Descreva o problema com mais detalhes");
-            return;
-        }
-
-        setLoading(true);
-        
-        const token = await getToken(); // ✅ Obtendo o token do AsyncStorage
-
-        try {
-            if (!token || token === 'undefined') {
-                setTimeout(() => {
-                    setLoading(false); // Desativa o loading após a requisição
-                    showPopupMessage("error", "Erro de autenticação. Faça login novamente.");
-                }, 2000);
-                setLoading(false);
-                return;
-            }
-
-            const currentDate = new Date();
-
-            const endpoint =
-                formData.assunto === "Outros"
-                    ? "/protocolo/abrir-protocolos-reclamar-sem-secretaria"
-                    : `/protocolo/abrir-protocolos-reclamar/${formData.idSecretaria}`;            
-
-            await API.post(endpoint, {
-                ...formData,
-                data_protocolo: currentDate,
-            }, {
-                headers: {
-                    Authorization: `Bearer ${token}`,
-                },
-            });
-
-            setTimeout(() => {
-                setLoading(false); // Desativa o loading após a requisição
-                showPopupMessage("success", "Reclamação enviada com sucesso!")
-                setTimeout(() => {
-                    router.push("/home");
-                }, 3000);
-            }, 3000);
-
-        } catch (error) {
-            setTimeout(() => {
-                setLoading(false); // Desativa o loading após a requisição
-                showPopupMessage("error", "Falha ao enviar reclamação.");
-            }, 2000);
-        }
-    };
 
     return (
         <SafeAreaView style={styles.container}>
@@ -203,7 +243,7 @@ const Reclamar: React.FC = () => {
                 >
                     <Picker.Item label="Selecione um problema" value="" />
                     {assuntos.map((item) => (
-                        <Picker.Item key={item.id_assunto} label={item.assunto} value={item.assunto} />
+                        <Picker.Item key={item.assunto} label={item.assunto} value={item.assunto} />
                     ))}
                 </Picker>
             </View>
@@ -216,6 +256,18 @@ const Reclamar: React.FC = () => {
                 multiline
                 textAlignVertical="top"
             />
+            <View style={styles.inputContainer}>
+                <Text style={{ marginLeft: 30, marginTop: 20 }}>Valor do Serviço</Text>
+                <TextInput
+                    style={[styles.campoValor, { backgroundColor: "#f0f0f0", color: "black" }]} // ReadOnly with different background
+                    value={
+                        formData.valor !== null && formData.valor !== undefined
+                            ? `R$ ${formData.valor.toFixed(2)}`
+                            : "Não definido"
+                    }
+                    editable={false} // Impede a edição do campo
+                />
+            </View>
 
             <TouchableOpacity
                 style={styles.button}
@@ -239,4 +291,4 @@ const Reclamar: React.FC = () => {
     );
 };
 
-export default Reclamar;
+export default SolicitarServico;
