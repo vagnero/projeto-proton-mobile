@@ -1,7 +1,11 @@
 import { NetworkInfo } from 'react-native-network-info';
 
-// let API_URL = "http://localhost:8080/protoon"; // Para emular na web
-let API_URL = "http://192.168.18.3:8080/protoon"; // Para emular no android
+// let API_URL_DEV = "http://localhost:8080/protoon";
+// let API_URL_PROD = "http://192.168.18.3:8080/protoon"; // Para emular no android
+
+// let API_URL = __DEV__ ? API_URL_PROD : API_URL_DEV;
+
+let API_URL = "http://192.168.18.3:8080/protoon"; // IP da rede da api
 
 // Função para obter a URL da API com base no IP local
 const getAPIUrl = async () => {

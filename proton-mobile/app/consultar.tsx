@@ -104,6 +104,7 @@ const Consultar = () => {
         },
         headerText: {
             fontSize: 10,
+            color: theme.secondary,
             fontWeight: "bold",
             textAlign: "center",
             flex: 1,
@@ -115,7 +116,7 @@ const Consultar = () => {
             minHeight: 50,
             padding: 5,
             paddingHorizontal: 10,
-            backgroundColor: "#f2f2f2",
+            backgroundColor: theme.primary,
             borderRadius: 10,
             shadowColor: "#000",
             shadowOffset: { width: 0, height: 2 },
@@ -133,14 +134,13 @@ const Consultar = () => {
         },
     });
 
-
     return (
         <View style={[styles.container, { backgroundColor: theme.background }]}>
             {loading && <ActivityIndicator size="large" color={theme.primary} />}
             {!loading &&
                 <View style={{ flex: 1 }}>
                     {/* Cabeçalho da tabela */}
-                    <View style={[styles.header, { backgroundColor: "#f2f2f2" }]}>
+                    <View style={[styles.header, { backgroundColor: theme.primary }]}>
                         <Text style={[styles.headerText, { flex: 1 }]}>Assunto</Text>
                         <Text style={[styles.headerText, { flex: 1 }]}>Descrição</Text>
                         <Text style={[styles.headerText, { flex: 1 }]}>Secretaria</Text>
