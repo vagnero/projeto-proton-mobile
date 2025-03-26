@@ -5,8 +5,8 @@ import { NetworkInfo } from 'react-native-network-info';
 
 // let API_URL = __DEV__ ? API_URL_PROD : API_URL_DEV;
 
-// let API_URL = "http://192.168.18.3:8080/protoon"; // IP da rede da api
-let API_URL = "http://hotel-engine.gl.at.ply.gg:42212/protoon"; // URL do tunel do site playit.gg
+let API_URL = "http://localhost:8080/protoon"; // IP da rede da api
+// let API_URL = "http://hotel-engine.gl.at.ply.gg:42212/protoon"; // URL do tunel do site playit.gg
 
 // Função para obter a URL da API com base no IP local
 const getAPIUrl = async () => {

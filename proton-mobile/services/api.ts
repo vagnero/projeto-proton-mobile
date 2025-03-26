@@ -30,6 +30,7 @@ const API = axios.create({
   withCredentials: true,
   headers: {
     "Content-Type": "application/json",
+    "User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 4) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.77 Mobile Safari/537.36"
   },
 });
 
